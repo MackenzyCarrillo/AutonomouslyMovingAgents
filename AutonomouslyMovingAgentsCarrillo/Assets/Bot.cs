@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+
 
 public class Bot : MonoBehaviour
 {
@@ -24,6 +26,7 @@ public class Bot : MonoBehaviour
     {
         Vector3 fleeVector = location - this.transform.position;
         agent.SetDestination(this.transform.position - fleeVector);
+
     }
 
     void Pursue()
@@ -57,7 +60,7 @@ public class Bot : MonoBehaviour
         float wanderDistance = 10;
         float wanderJitter = 1;
 
-        wanderTarget += new Vector3(Random.Range(-1.0f, 1.0f) * wanderJitter, 0, (Random.Range(-1.0f, 1.0f) * wanderJitter));
+        wanderTarget += new Vector3(UnityEngine.Random.Range(-1.0f, 1.0f) * wanderJitter, 0, (UnityEngine.Random.Range(-1.0f, 1.0f) * wanderJitter));
 
         wanderTarget.Normalize();
         wanderTarget *= wanderRadius;
@@ -136,28 +139,48 @@ public class Bot : MonoBehaviour
         float lookingAngle = Vector3.Angle(target.transform.forward, toAgent);
 
         if (lookingAngle > 60)
+        {
             return true;
+        }
         return false;
     }
 
     bool coolDown = false;
-    void BehaviourCooldown()
+    void BehaviorCoolDown()
     {
         coolDown = false;
     }
+
+    bool TargetInRange()
+    {
+        if (Vector3.Distance(this.transform.position, target.transform.position) < 10)
+        {
+            return true;
+        }
+        return false;
+
+    }
     void Update()
     {
-        if(!coolDown) 
+        if (!coolDown)
         {
-            if (CanSeeTarget() && TargetCanSeeMe())
+            if (!TargetInRange())
             {
-                CleverHide();
-                coolDown = true;
-                Invoke("BehaviourCoolDown", 5);
-            }   
+                Wander();
+            }
+
+            else if (CanSeeTarget() && TargetCanSeeMe())
+                 {
+                  CleverHide();
+                  coolDown = true;
+                  Invoke("BehaviorCoolDown", 5);
+                 }
             else
+            {
                 Pursue();
+            }
+
         }
-        
+
     }
 }
